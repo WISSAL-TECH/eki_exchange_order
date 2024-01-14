@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_quotation_form_inherit_id" model="ir.ui.view">
+            <field name="name">view.quotation.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='partner_details']" position="inside">
+                    <field name="ek_file"/>
+                    <field name="ek_state"/>
+                    <field name="cancel_reason" attrs="{'invisible': [('state', '!=', 'cancel')]}"/>
+                </xpath>
+            </field>
+        </record>
+</odoo>
+
