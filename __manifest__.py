@@ -23,7 +23,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base_setup', 'base', 'product', 'stock', 'sale', 'purchase','crm'],
+    'depends': ['base_setup', 'base', 'product', 'stock', 'sale', 'purchase','crm','eki_config'],
 
     # always loaded
     'data': [
