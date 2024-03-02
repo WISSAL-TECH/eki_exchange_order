@@ -100,6 +100,7 @@ class EkOrder(models.Model):
                 vals.pop('order_line')
 
             rec = super(EkOrder, self).create(vals)
+            product = None
 
             if order_line_values:
                 for line in order_line_values:
