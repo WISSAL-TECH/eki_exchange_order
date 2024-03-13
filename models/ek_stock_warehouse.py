@@ -129,12 +129,14 @@ class StockPicking(models.Model):
             "requestNumber": num_dossier,
             "state": "EK_ORDER_DELIVERED"
         }
-
-        data = [{
-            "pos": "EKIWH",
-            "reference": self.move_line_ids_without_package.product_id.default_code,
-            "realQuantity": self.move_line_ids_without_package.product_id.qty_available,
-            "price": self.move_line_ids_without_package.product_id.list_price}]
+        data =[]
+        for line in self.move_line_ids_without_package:
+            dataa = {
+                "pos": "EKIWH",
+                "reference": line.product_id.default_code,
+                "realQuantity": line.product_id.qty_available,
+                "price": line.product_id.list_price}
+            data.append(dataa)
 
 
         _logger.info(
