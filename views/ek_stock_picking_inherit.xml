@@ -66,6 +66,7 @@
             </xpath>
 
             <xpath expr="//field[@name='origin']" position="after">
+                <field name="ek_file"/>
                 <field name="can_validate" attrs="{'invisible': [('company_id', '=', 3)]}"/>
             </xpath>
         </field>
