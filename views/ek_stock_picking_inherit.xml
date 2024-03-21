@@ -53,7 +53,8 @@
                             string="Unlock" groups="stock.group_stock_manager" type="object"
                             help="If the picking is unlocked you can edit initial demand (for a draft picking) or done quantities (for a done picking)."
                             data-hotkey="l"/>
-                    <button name="action_toggle_is_locked" attrs="{'invisible': ['|',('is_locked', '=', True), ('can_validate', '!=', 'validated')]}"
+                    <button name="action_toggle_is_locked"
+                            attrs="{'invisible': ['|',('is_locked', '=', True), ('can_validate', '!=', 'validated')]}"
                             string="Lock"
                             groups="stock.group_stock_manager" type="object" data-hotkey="l"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,assigned,done"/>
@@ -66,7 +67,7 @@
 
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="ek_file"/>
-                <field name="can_validate"/>
+                <field name="can_validate" attrs="{'invisible': [('company_id', '=', 3)]}"/>
             </xpath>
         </field>
     </record>

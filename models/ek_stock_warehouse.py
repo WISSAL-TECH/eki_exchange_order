@@ -167,6 +167,7 @@ class StockPicking(models.Model):
 
             response = super(StockPicking, self).write(vals)
 
+
             _logger.info(
                 '\n\n\nresponse value is :  \n\n\n\n\n--->  %s\n\n\n\n\n\n\n', response)
 
@@ -177,5 +178,18 @@ class StockPicking(models.Model):
 
         # IF UPDATE MADE BY odoo--------------------------------------------------------------------------------------
         else:
+            if 'company_id' in vals:
+                if vals['company_id'] == 3:
+                    vals['can_validate'] = 'validated'
+                else:
+                    vals.setdefault('can_validate', 'validating')
             response = super(StockPicking, self).write(vals)
             return response
+    @api.model
+    def create(self, vals):
+        if 'company_id' in vals and vals.get('company_id') == 3:
+            vals['can_validate'] = 'validated'
+        else:
+            vals.setdefault('can_validate', 'validating')
+        return super(StockPicking, self).create(vals)
+
