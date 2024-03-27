@@ -51,7 +51,11 @@ class EkOrder(models.Model):
                                 if 'source' in client and client['source']:
                                     # Get the bank record
                                     bank = self.env['res.partner'].search([('name', '=', client['source'])])
-                                    client['parent_id'] = bank.id
+                                    if bank:
+                                        client['parent_id'] = bank.id
+                                    else:
+                                        bank = self.env['res.partner'].create([{'name': client['source']}])
+                                        client['parent_id'] = bank.id
 
                                     client.pop('source')
 
