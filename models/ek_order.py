@@ -179,3 +179,10 @@ class EkOrder(models.Model):
 
         else:
             return super(EkOrder, self).write(vals)
+
+    @api.multi
+    def action_cancel(self):
+            # Method implementation to cancel the order
+            # This method should not take any additional arguments
+            for order in self:
+                order.state = 'cancel'
