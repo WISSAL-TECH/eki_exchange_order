@@ -19,6 +19,7 @@ class StockPicking(models.Model):
     create_by = fields.Char(string="Créé à partir de", readonly=True)
     ek_file = fields.Char("Dossier ekiclik", compute="_compute_ek_file")
     can_validate = fields.Selection([('validating', 'Dossier en cours de  validation'), ('validated', 'Dossier validé')], 'Status de validation', default='validating')
+    order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase' )
 
 
     # set the url and headers
@@ -33,6 +34,15 @@ class StockPicking(models.Model):
 
         order = self.env['sale.order'].search([('name', '=', self.origin)])
         self.ek_file = order.ek_file
+
+    def _compute_order_or_purchase(self):
+        """function to compute the oder_or_purchase value"""
+
+        purchase = self.env['purchase.order'].search([('name', '=', self.origin)])
+        if purchase :
+            return False
+        else:
+            return True
 
     def button_validate(self):
         # Clean-up the context key at validation to avoid forcing the creation of immediate
