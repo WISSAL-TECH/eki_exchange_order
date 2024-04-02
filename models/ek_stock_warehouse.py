@@ -19,7 +19,7 @@ class StockPicking(models.Model):
     create_by = fields.Char(string="Créé à partir de", readonly=True)
     ek_file = fields.Char("Dossier ekiclik", compute="_compute_ek_file")
     can_validate = fields.Selection([('validating', 'Dossier en cours de  validation'), ('validated', 'Dossier validé')], 'Status de validation', default='validated')
-    order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase' )
+    order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase')
 
     # set the url and headers
     headers = {"Content-Type": "application/json", "Accept": "application/json", "Catch-Control": "no-cache"}
@@ -38,7 +38,7 @@ class StockPicking(models.Model):
         """function to compute the oder_or_purchase value"""
 
         purchase = self.env['purchase.order'].search([('name', '=', self.origin)])
-        if purchase :
+        if purchase:
             self.order_or_purchase = False
         else:
             self.order_or_purchase = True
@@ -185,20 +185,5 @@ class StockPicking(models.Model):
                     '\n\n\nstock picking updated from ekiclik \n\n\n\n\n--->  %s\n\n\n\n\n\n\n', vals)
             return response
 
-        # IF UPDATE MADE BY odoo--------------------------------------------------------------------------------------
-        else:
-            if 'company_id' in vals:
-                if vals['company_id'] == 3:
-                    vals['can_validate'] = 'validated'
-                else:
-                    vals.setdefault('can_validate', 'validating')
-            response = super(StockPicking, self).write(vals)
-            return response
-    @api.model
-    def create(self, vals):
-        if 'company_id' in vals and vals.get('company_id') == 3:
-            vals['can_validate'] = 'validated'
-        else:
-            vals.setdefault('can_validate', 'validating')
-        return super(StockPicking, self).create(vals)
+
 
