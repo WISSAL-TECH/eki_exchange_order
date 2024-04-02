@@ -21,7 +21,6 @@ class StockPicking(models.Model):
     can_validate = fields.Selection([('validating', 'Dossier en cours de  validation'), ('validated', 'Dossier validé')], 'Status de validation', default='validating')
     order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase' )
 
-
     # set the url and headers
     headers = {"Content-Type": "application/json", "Accept": "application/json", "Catch-Control": "no-cache"}
     url_stock = '/api/odoo/stocks'

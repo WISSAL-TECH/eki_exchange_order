@@ -70,7 +70,6 @@
                 <field name="order_or_purchase" invisible="1"/>
                 <field name="can_validate" attrs="{'invisible': ['|',('company_id', '=', 3),('order_or_purchase', '=', False)]}"/>
             </xpath>
-
         </field>
     </record>
 </odoo>
