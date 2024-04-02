@@ -39,9 +39,9 @@ class StockPicking(models.Model):
 
         purchase = self.env['purchase.order'].search([('name', '=', self.origin)])
         if purchase :
-            return False
+            self.order_or_purchase = False
         else:
-            return True
+            self.order_or_purchase = True
 
     def button_validate(self):
         # Clean-up the context key at validation to avoid forcing the creation of immediate
