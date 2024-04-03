@@ -182,11 +182,11 @@ class EkOrder(models.Model):
 
         else:
             return super(EkOrder, self).write(vals)
+
     @api.onchange('ek_state')
     def onchange_state(self):
-
         if self.ek_state == "Client livré":
-            picking = self.env['stock.picking'].search([('origin','=',self.name)])
+            picking = self.env['stock.picking'].search([('origin', '=', self.name)])
             if picking:
                 picking.button_validate()
             invoice_vals = {
@@ -207,5 +207,8 @@ class EkOrder(models.Model):
 
             # Link invoice to sale order
             self.invoice_ids += invoice
+
+            return picking, invoice
+
 
 
