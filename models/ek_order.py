@@ -189,11 +189,18 @@ class EkOrder(models.Model):
             picking = self.env['stock.picking'].search([('origin','=',self.name)])
             if picking:
                 picking.button_validate()
+            if picking:
+                # Check if any move in the picking has quantities to be reserved or delivered
+                if any(move.state not in ('assigned', 'done') for move in picking.move_ids):
+                    picking.action_assign()  # Try to assign quantities
 
+                # Check if any move in the picking has quantities delivered
+                if all(move.state == 'done' for move in picking.move_ids):
+                    picking.button_validate()  # Validate the picking
             invoice_vals = {
                 'partner_id': self.partner_id.id,
                 'invoice_origin': self.name,
-                'type': 'out_invoice',  # for customer invoice
+                'move_type': 'out_invoice',  # for customer invoice
                 'currency_id': self.currency_id.id,
                 'invoice_line_ids': [(0, 0, {
                     'product_id': line.product_id.id,
