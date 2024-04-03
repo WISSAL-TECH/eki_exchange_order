@@ -182,3 +182,31 @@ class EkOrder(models.Model):
 
         else:
             return super(EkOrder, self).write(vals)
+    @api.onchange('ek_state')
+    def onchange_state(self):
+
+        if self.ek_state == "Client livré":
+            picking = self.env['stock.picking'].search([('origin','=',self.name)])
+            if picking:
+                picking.button_validate()
+
+            invoice_vals = {
+                'partner_id': self.partner_id.id,
+                'invoice_origin': self.name,
+                'type': 'out_invoice',  # for customer invoice
+                'currency_id': self.currency_id.id,
+                'invoice_line_ids': [(0, 0, {
+                    'product_id': line.product_id.id,
+                    'name': line.name,
+                    'quantity': line.product_uom_qty,
+                    'price_unit': line.price_unit,
+                    'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
+                }) for line in self.order_line],
+            }
+            invoice = self.env['account.move'].create(invoice_vals)
+            invoice.action_post()
+
+            # Link invoice to sale order
+            self.invoice_ids += invoice
+
+
