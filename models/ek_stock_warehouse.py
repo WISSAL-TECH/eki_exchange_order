@@ -142,7 +142,7 @@ class StockPicking(models.Model):
         for line in self.move_line_ids_without_package:
             dataa = {
                 "pos": "EKIWH",
-                "reference": line.product_id.default_code,
+                "configuration_ref_odoo": line.product_id.ref_odoo,
                 "realQuantity": line.product_id.qty_available,
                 "price": line.product_id.list_price}
             data.append(dataa)
