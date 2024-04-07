@@ -113,10 +113,11 @@ class EkOrder(models.Model):
             if order_line_values:
                 for line in order_line_values:
                     # Get the product record based on default_code
+                    # Get the product record based on ref_odoo
                     if 'ref_odoo' in line:
-                        product = self.env['product.product'].search(
-                            [('ref_odoo', '=', line['ref_odoo'])])
+                        product = self.env['product.product'].search([('ref_odoo', '=', line['ref_odoo'])], limit=1)
 
+                    # Ensure a single product is found
                     if product:
                         order_values = {
                             'product_id': product.id,
