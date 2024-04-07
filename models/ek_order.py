@@ -182,22 +182,15 @@ class EkOrder(models.Model):
             self._compute_onchange_state(vals)
             return super(EkOrder, self).write(vals)
 
-    def _compute_onchange_state(self, vals):
+    def _compute_onchange_state(self):
         for record in self:
-            if vals.get('ek_state') == "Client livré":
-                _logger.info("Detected EK state 'Client livré'")
-
+            if record.ek_state == "Client livré":
                 picking = self.env['stock.picking'].search([('origin', '=', record.name)])
                 if picking:
-                    _logger.info("Found associated stock picking '%s'", picking.name)
                     picking.button_validate()
-                    _logger.info("Validated associated stock picking '%s'", picking.name)
-                else:
-                    _logger.warning("No stock picking found for order '%s'", record.name)
-
                 invoice_vals = {
                     'partner_id': record.partner_id.id,
-                    'invoice_origin': record.name,  # Set invoice_origin value
+                    'invoice_origin': record.name,
                     'move_type': 'out_invoice',  # for customer invoice
                     'currency_id': record.currency_id.id,
                     'invoice_line_ids': [(0, 0, {
@@ -208,22 +201,8 @@ class EkOrder(models.Model):
                         'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
                     }) for line in record.order_line],
                 }
-                if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
-                    invoice = self.env['account.move'].create(invoice_vals)
-                    _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
-                                 record.name)  # Log creation with invoice_origin
+                invoice = self.env['account.move'].create(invoice_vals)
+                invoice.action_post()
 
-                    # Write invoice_origin on the invoice
-                    invoice.invoice_origin = record.name
-
-                    invoice.action_post()
-                    _logger.info("Invoice posted successfully for order '%s'", record.name)
-
-                    # Add the invoice to the Many2many field
-                    try:
-                        record.invoice_ids = [(4, invoice.id)]
-                        _logger.debug("Invoice linked to sale order '%s'", record.name)
-                    except Exception as e:
-                        _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
-                else:
-                    _logger.warning("No order lines found for order '%s'", record.name)
+                # Link invoice to sale order
+                record.write({'invoice_ids': [(4, invoice.id)]})  # Update invoice_ids with new invoice
