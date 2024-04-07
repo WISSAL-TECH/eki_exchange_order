@@ -153,13 +153,13 @@ class EkOrder(models.Model):
             return super(EkOrder, self).create(vals)
 
     def write(self, vals):
-        # SET THE ENVIRONMENT
-        utils = self.env['odoo_utils']
-        domain = "https://apiadmin-alsalam-stg.wissal-group.com"
+        _logger.info("Writing records with values: %s", vals)
 
         # Receive order/quotation from EK
         if 'create_by' in vals and vals['create_by'] != 'odoo':
             try:
+                _logger.debug("Received order/quotation from EK")
+
                 # Map EK states to Odoo states
                 state_mapping = {
                     "EK_ORDER_IN_PREPARATION": "Commande en préparation",
@@ -169,26 +169,36 @@ class EkOrder(models.Model):
                 }
                 # Update ek_state if present in vals
                 if 'ek_state' in vals:
-                    vals['ek_state'] = state_mapping.get(vals['ek_state'], vals['ek_state'])
+                    old_state = vals['ek_state']
+                    vals['ek_state'] = state_mapping.get(old_state, old_state)
+                    _logger.debug("Mapped EK state '%s' to Odoo state '%s'", old_state, vals['ek_state'])
 
                 vals['create_by'] = "ekiclik"
                 self._compute_onchange_state()
+                _logger.debug("Onchange state computed successfully")
                 return super(EkOrder, self).write(vals)
 
             except Exception as e:
                 _logger.error("An error occurred during EkOrder write operation: %s", e)
                 raise
-
         else:
             self._compute_onchange_state()
+            _logger.debug("Onchange state computed successfully")
             return super(EkOrder, self).write(vals)
 
     def _compute_onchange_state(self):
         for record in self:
             if record.ek_state == "Client livré":
+                _logger.info("Detected EK state 'Client livré'")
+
                 picking = self.env['stock.picking'].search([('origin', '=', record.name)])
                 if picking:
+                    _logger.info("Found associated stock picking '%s'", picking.name)
                     picking.button_validate()
+                    _logger.debug("Picking '%s' validated successfully", picking.name)
+                else:
+                    _logger.warning("No stock picking found for order '%s'", record.name)
+
                 invoice_vals = {
                     'partner_id': record.partner_id.id,
                     'invoice_origin': record.name,
@@ -202,11 +212,14 @@ class EkOrder(models.Model):
                         'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
                     }) for line in record.order_line],
                 }
-                invoice = self.env['account.move'].create(invoice_vals)
-                invoice.action_post()
+                if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
+                    invoice = self.env['account.move'].create(invoice_vals)
+                    invoice.action_post()
+                    _logger.info("Invoice created successfully for order '%s'", record.name)
 
-                # Link invoice to sale order
-                record.invoice_ids += invoice
-
-
+                    # Link invoice to sale order
+                    record.invoice_ids += invoice
+                    _logger.debug("Invoice linked to sale order '%s'", record.name)
+                else:
+                    _logger.warning("No order lines found for order '%s'", record.name)
 
