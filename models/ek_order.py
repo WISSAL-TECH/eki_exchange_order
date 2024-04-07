@@ -143,7 +143,7 @@ class EkOrder(models.Model):
                                 'name': rec.name,
                                 'product_uom': new_product.uom_id.id,
                                 'state': 'sale',
-                                'price_unit': product.list_price,
+                                'price_unit': product.lst_price,
                                 'order_id': rec.id
 
                             }
