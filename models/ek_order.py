@@ -113,9 +113,9 @@ class EkOrder(models.Model):
             if order_line_values:
                 for line in order_line_values:
                     # Get the product record based on default_code
-                    if 'default_code' in line:
+                    if 'ref_odoo' in line:
                         product = self.env['product.product'].search(
-                            [('default_code', '=', line['default_code'])])
+                            [('ref_odoo', '=', line['ref_odoo'])])
 
                     if product:
                         order_values = {
@@ -132,7 +132,7 @@ class EkOrder(models.Model):
                     else:
                         new_product = self.env['product.product'].create({
                             'name': line['product_name'],
-                            'default_code': line['default_code']
+                            'ref_odoo': line['ref_odoo']
                         })
 
                         if new_product:
