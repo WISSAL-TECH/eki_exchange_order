@@ -158,8 +158,6 @@ class EkOrder(models.Model):
         # Receive order/quotation from EK
         if 'create_by' in vals and vals['create_by'] != 'odoo':
             try:
-                _logger.debug("Received order/quotation from EK")
-
                 # Map EK states to Odoo states
                 state_mapping = {
                     "EK_ORDER_IN_PREPARATION": "Commande en préparation",
@@ -174,21 +172,19 @@ class EkOrder(models.Model):
                     _logger.debug("Mapped EK state '%s' to Odoo state '%s'", old_state, vals['ek_state'])
 
                 vals['create_by'] = "ekiclik"
-                self._compute_onchange_state()
-                _logger.debug("Onchange state computed successfully")
+                self._compute_onchange_state(vals)
                 return super(EkOrder, self).write(vals)
 
             except Exception as e:
                 _logger.error("An error occurred during EkOrder write operation: %s", e)
                 raise
         else:
-            self._compute_onchange_state()
-            _logger.debug("Onchange state computed successfully")
+            self._compute_onchange_state(vals)
             return super(EkOrder, self).write(vals)
 
-    def _compute_onchange_state(self):
+    def _compute_onchange_state(self, vals):
         for record in self:
-            if record.ek_state == "Client livré":
+            if vals.get('ek_state') == "Client livré":
                 _logger.info("Detected EK state 'Client livré'")
 
                 picking = self.env['stock.picking'].search([('origin', '=', record.name)])
@@ -222,4 +218,3 @@ class EkOrder(models.Model):
                     _logger.debug("Invoice linked to sale order '%s'", record.name)
                 else:
                     _logger.warning("No order lines found for order '%s'", record.name)
-
