@@ -191,13 +191,13 @@ class EkOrder(models.Model):
                 if picking:
                     _logger.info("Found associated stock picking '%s'", picking.name)
                     picking.button_validate()
-                    _logger.debug("Picking '%s' validated successfully", picking.name)
+                    _logger.info("Validated associated stock picking '%s'", picking.name)
                 else:
                     _logger.warning("No stock picking found for order '%s'", record.name)
 
                 invoice_vals = {
                     'partner_id': record.partner_id.id,
-                    'invoice_origin': record.name,
+                    'invoice_origin': record.name,  # Set invoice_origin value
                     'move_type': 'out_invoice',  # for customer invoice
                     'currency_id': record.currency_id.id,
                     'invoice_line_ids': [(0, 0, {
@@ -210,11 +210,13 @@ class EkOrder(models.Model):
                 }
                 if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
                     invoice = self.env['account.move'].create(invoice_vals)
+                    _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
+                                 record.name)  # Log creation with invoice_origin
                     invoice.action_post()
-                    _logger.info("Invoice created successfully for order '%s'", record.name)
+                    _logger.info("Invoice posted successfully for order '%s'", record.name)
 
                     # Link invoice to sale order
-                    record.invoice_ids += invoice
+                    record.write({'invoice_ids': [(4, invoice.id)]})
                     _logger.debug("Invoice linked to sale order '%s'", record.name)
                 else:
                     _logger.warning("No order lines found for order '%s'", record.name)
