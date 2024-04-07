@@ -212,11 +212,18 @@ class EkOrder(models.Model):
                     invoice = self.env['account.move'].create(invoice_vals)
                     _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
                                  record.name)  # Log creation with invoice_origin
+
+                    # Write invoice_origin on the invoice
+                    invoice.invoice_origin = record.name
+
                     invoice.action_post()
                     _logger.info("Invoice posted successfully for order '%s'", record.name)
 
-                    # Link invoice to sale order
-                    record.write({'invoice_ids': [(4, invoice.id)]})
-                    _logger.debug("Invoice linked to sale order '%s'", record.name)
+                    # Add the invoice to the Many2many field
+                    try:
+                        record.write({'invoice_ids': [(4, invoice.id)]})
+                        _logger.debug("Invoice linked to sale order '%s'", record.name)
+                    except Exception as e:
+                        _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
                 else:
                     _logger.warning("No order lines found for order '%s'", record.name)
