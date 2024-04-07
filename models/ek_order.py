@@ -153,37 +153,36 @@ class EkOrder(models.Model):
             return super(EkOrder, self).create(vals)
 
     def write(self, vals):
-
         # SET THE ENVIRONMENT
         utils = self.env['odoo_utils']
         domain = "https://apiadmin-alsalam-stg.wissal-group.com"
 
-        # RECEIVE ORDER/QUOTATION FROM EK
+        # Receive order/quotation from EK
         if 'create_by' in vals and vals['create_by'] != 'odoo':
             try:
-                if 'ek_state' in vals and vals['ek_state']:
-                    if vals['ek_state'] == "EK_ORDER_IN_PREPARATION":
-                        vals['ek_state'] = "Commande en préparation"
-                    if vals['ek_state'] == "EK_ORDER_IN_DELIVERY":
-                        vals['ek_state'] = "Livraison en cours"
-                    if vals['ek_state'] == "EK_ORDER_DELIVERED":
-                        vals['ek_state'] = "Client livré"
-                    if vals['ek_state'] == "EK_CLIENT_ORDER_CANCELED":
-                        vals['ek_state'] = "Commande annulée"
-                        self.action_cancel()
+                # Map EK states to Odoo states
+                state_mapping = {
+                    "EK_ORDER_IN_PREPARATION": "Commande en préparation",
+                    "EK_ORDER_IN_DELIVERY": "Livraison en cours",
+                    "EK_ORDER_DELIVERED": "Client livré",
+                    "EK_CLIENT_ORDER_CANCELED": "Commande annulée",
+                }
+                # Update ek_state if present in vals
+                if 'ek_state' in vals:
+                    vals['ek_state'] = state_mapping.get(vals['ek_state'], vals['ek_state'])
 
                 vals['create_by'] = "ekiclik"
-
+                self._compute_onchange_state()
                 return super(EkOrder, self).write(vals)
 
             except Exception as e:
-                _logger.error("An error occurred: %s", e)
+                _logger.error("An error occurred during EkOrder write operation: %s", e)
                 raise
 
         else:
+            self._compute_onchange_state()
             return super(EkOrder, self).write(vals)
 
-    @api.depends('ek_state')
     def _compute_onchange_state(self):
         for record in self:
             if record.ek_state == "Client livré":
@@ -208,8 +207,6 @@ class EkOrder(models.Model):
 
                 # Link invoice to sale order
                 record.invoice_ids += invoice
-
-            #return picking, invoice
 
 
 
