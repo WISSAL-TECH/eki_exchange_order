@@ -221,7 +221,7 @@ class EkOrder(models.Model):
 
                     # Add the invoice to the Many2many field
                     try:
-                        record.write({'invoice_ids': [(4, invoice.id)]})
+                        record.invoice_ids = [(4, invoice.id)]
                         _logger.debug("Invoice linked to sale order '%s'", record.name)
                     except Exception as e:
                         _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
