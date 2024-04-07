@@ -122,10 +122,10 @@ class EkOrder(models.Model):
                         order_values = {
                             'product_id': product.id,
                             'product_uom_qty': line['qty'],
-                            'name': rec.name,
+                            'name': product.name,
                             'product_uom': product.uom_id.id,
                             'state': 'sale',
-                            'price_unit': product.list_price,
+                            'price_unit': product.list_price if product.list_price else 0,
                             'order_id': rec.id
                         }
                         self.env['sale.order.line'].create(order_values)
