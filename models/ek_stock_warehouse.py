@@ -1,4 +1,6 @@
 import json
+import re
+
 import requests
 from odoo import models, fields, api, exceptions
 from odoo.http import request
@@ -140,11 +142,30 @@ class StockPicking(models.Model):
         }
         data =[]
         for line in self.move_line_ids_without_package:
+            numeric_value = ""
+            if line.product_id.tax_string:
+                pattern = r'(\d[\d\s,.]+)'
+
+                # Use the findall function to extract all matches
+                matches = re.findall(pattern, line.product_id.tax_string)
+
+
+                # Join the matches into a single string (if there are multiple matches)
+                numeric_value = ''.join(matches)
+
+                # Replace commas with dots (if necessary)
+                numeric_value = numeric_value.replace(',', '.')
+
+                # Remove non-breaking space characters
+                numeric_value = numeric_value.replace('\xa0', '')
+
+            else:
+                numeric_value = line.product_id.list_price
             dataa = {
                 "pos": "EKIWH",
                 "configuration_ref_odoo": line.product_id.ref_odoo,
                 "realQuantity": line.product_id.qty_available,
-                "price": line.product_id.list_price}
+                "price": numeric_value}
             data.append(dataa)
 
 
