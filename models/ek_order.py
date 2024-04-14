@@ -225,7 +225,7 @@ class EkOrder(models.Model):
                     invoice.action_post()
                     _logger.info("Invoice posted successfully for order '%s'", record.name)
                     for move in invoice:
-                        order_id = self.mapped('sale_line_id.order_id')
+                        order_id = self.mapped('order_line.order_id')
                         move.message_post_with_view('mail.message_origin_link',
                                                     values={'self': move,
                                                             'origin': order_id},
