@@ -210,7 +210,6 @@ class EkOrder(models.Model):
                         'quantity': line.product_uom_qty,
                         'price_unit': line.price_unit,
                         'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
-                        'order_id': record.id,
                     }) for line in record.order_line],
                 }
                 if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
@@ -228,7 +227,7 @@ class EkOrder(models.Model):
                     for move in invoice:
                         move.message_post_with_view('mail.message_origin_link',
                                                     values={'self': move,
-                                                            'origin': move.line_ids.mapped('invoice_line_ids.order_id')},
+                                                            'origin': move.mapped('invoice_origin')},
                                                     subtype_id=self.env.ref('mail.mt_note').id
                                                     )
                     # Add the invoice to the Many2many field
