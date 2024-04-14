@@ -187,7 +187,6 @@ class EkOrder(models.Model):
     def _compute_onchange_state(self, vals):
         for record in self:
             _logger.warning("ORDER NAME: '%s'", record.name)
-            record._create_invoices(self, group=False)
             _logger.warning("existing invoices: '%s'", record.invoice_ids.ids)
 
             if vals.get('ek_state') == "Client livré":
