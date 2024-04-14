@@ -235,7 +235,8 @@ class EkOrder(models.Model):
                     try:
                         record.write({'invoice_ids': [(4, invoice.id)]})  # Update invoice_ids with new invoice
                         _logger.debug("Invoice linked to sale order '%s'", record.name)
-                        _logger.warning(" INVOICE IDS'%s'", record.invoice_ids)
+                        _logger.warning(" INVOICE IDS'%s'", record.invoice_ids.ids)
+                        record.invoice_count += 1
 
                     except Exception as e:
                         _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
