@@ -189,24 +189,18 @@ class EkOrder(models.Model):
             if vals.get('ek_state') == "Client livré":
                 _logger.info("Detected EK state 'Client livré'")
 
-                # Check if the associated stock picking is confirmed
-                picking = self.env['stock.picking'].search([('origin', '=', record.name), ('state', '=', 'done')])
-                if not picking:
-                    _logger.warning("No confirmed stock picking found for order '%s'", record.name)
-                    continue  # Skip processing this record if picking is not confirmed
-
-                # Check invoicing policy for each product
-                for line in record.order_line:
-                    if line.product_id.invoice_policy != 'order':
-                        _logger.warning(
-                            "Invoicing policy not set to 'Ordered quantities' for product '%s' in order '%s'",
-                            line.product_id.name, record.name)
-                        continue  # Skip processing this record if invoicing policy is not 'Ordered quantities'
+                picking = self.env['stock.picking'].search([('origin', '=', record.name)])
+                if picking:
+                    _logger.info("Found associated stock picking '%s'", picking.name)
+                    picking.button_validate()
+                    _logger.info("Validated associated stock picking '%s'", picking.name)
+                else:
+                    _logger.warning("No stock picking found for order '%s'", record.name)
 
                 invoice_vals = {
                     'partner_id': record.partner_id.id,
-                    'invoice_origin': record.name,
-                    'move_type': 'out_invoice',
+                    'invoice_origin': record.name,  # Set invoice_origin value
+                    'move_type': 'out_invoice',  # for customer invoice
                     'currency_id': record.currency_id.id,
                     'invoice_line_ids': [(0, 0, {
                         'product_id': line.product_id.id,
@@ -216,16 +210,22 @@ class EkOrder(models.Model):
                         'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
                     }) for line in record.order_line],
                 }
+                if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
+                    invoice = self.env['account.move'].create(invoice_vals)
+                    _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
+                                 record.name)  # Log creation with invoice_origin
 
-                if invoice_vals['invoice_line_ids']:
-                    sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
-                    invoices = sale_orders._create_invoices()  # Create invoices and get their ids
-                    _logger.info("Invoices created with invoice_origin '%s' for order '%s'", record.name, record.name)
-                    _logger.info("Invoices posted successfully for order '%s'", record.name)
+                    # Write invoice_origin on the invoice
+                    invoice.invoice_origin = record.name
+
+                    invoice.action_post()
+                    _logger.info("Invoice posted successfully for order '%s'", record.name)
+
+                    # Add the invoice to the Many2many field
                     try:
-                        record.write({'invoice_ids': [(4, invoice.id) for invoice in invoices]})
-                        _logger.debug("Invoices linked to sale order '%s'", record.name)
+                        record.write({'invoice_ids': [(4, invoice.id)]})  # Update invoice_ids with new invoice
+                        _logger.debug("Invoice linked to sale order '%s'", record.name)
                     except Exception as e:
-                        _logger.error("Error linking invoices to sale order '%s': %s", record.name, e)
+                        _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
                 else:
                     _logger.warning("No order lines found for order '%s'", record.name)
