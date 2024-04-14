@@ -201,8 +201,8 @@ class EkOrder(models.Model):
 
                 invoice_vals = {
                     'partner_id': record.partner_id.id,
-                    'invoice_origin': record.name,  # Set invoice_origin value
-                    'move_type': 'out_invoice',  # for customer invoice
+                    'invoice_origin': record.name,
+                    'move_type': 'out_invoice',
                     'currency_id': record.currency_id.id,
                     'invoice_line_ids': [(0, 0, {
                         'product_id': line.product_id.id,
@@ -212,27 +212,33 @@ class EkOrder(models.Model):
                         'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
                     }) for line in record.order_line],
                 }
-                if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
+                if invoice_vals['invoice_line_ids']:
                     invoice = self.env['account.move'].sudo().with_context(default_move_type='out_invoice').create(
                         invoice_vals)
 
                     _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
-                                 record.name)  # Log creation with invoice_origin
+                                 record.name)
 
-                    # Write invoice_origin on the invoice
                     invoice.invoice_origin = record.name
 
                     invoice.action_post()
                     _logger.info("Invoice posted successfully for order '%s'", record.name)
+
+                    # Adjust context to include the correct object with '_name' attribute
+                    context = dict(self.env.context)
+                    context.update({
+                        'o': record,  # Assuming 'record' is the object you want to pass to the template
+                    })
+
                     for move in invoice:
                         move.message_post_with_view('mail.message_origin_link',
                                                     values={'self': move,
                                                             'origin': record.name},
-                                                    subtype_id=self.env.ref('mail.mt_note').id
+                                                    subtype_id=self.env.ref('mail.mt_note').id,
+                                                    context=context  # Pass the updated context
                                                     )
-                    # Add the invoice to the Many2many field
                     try:
-                        record.write({'invoice_ids': [(4, invoice.id)]})  # Update invoice_ids with new invoice
+                        record.write({'invoice_ids': [(4, invoice.id)]})
                         _logger.debug("Invoice linked to sale order '%s'", record.name)
                     except Exception as e:
                         _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
