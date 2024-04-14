@@ -230,7 +230,14 @@ class EkOrder(models.Model):
                                                 )
                     # Update invoice_ids with new invoice
                     try:
-                        record.write({'invoice_ids': [(4, invoice.id)]})
+                        existing_invoice_ids = record.invoice_ids.ids  # Get the existing invoice ids
+                        new_invoice_id = invoice.id  # Get the id of the new invoice
+
+                        # Combine the existing ids with the new id, removing duplicates
+                        updated_invoice_ids = list(set(existing_invoice_ids + [new_invoice_id]))
+
+                        # Update invoice_ids with the updated list of ids
+                        record.write({'invoice_ids': [(6, 0, updated_invoice_ids)]})
                         _logger.debug("Invoice linked to sale order '%s'", record.name)
                         _logger.warning("INVOICE IDS: %s", record.invoice_ids.ids)
                     except Exception as e:
