@@ -6,6 +6,7 @@ from datetime import datetime
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 from odoo.exceptions import ValidationError, UserError
 from odoo.http import request
+
 _logger = logging.getLogger(__name__)
 from .config import *
 
@@ -13,13 +14,12 @@ from .config import *
 class EkOrder(models.Model):
     _inherit = 'sale.order'
 
-
     create_by = fields.Char('Crée a partir de', default='Odoo')
     ek_file = fields.Char("Dossier ekiclik")
     ek_state = fields.Char("Statut ekiclik")
     cancel_reason = fields.Char("Motif d'annulation de dossier")
 
-    headers = {"Content-Type": "application/json","Accept": "application/json", "Catch-Control": "no-cache"}
+    headers = {"Content-Type": "application/json", "Accept": "application/json", "Catch-Control": "no-cache"}
 
     @api.model
     def create(self, vals):
@@ -185,67 +185,8 @@ class EkOrder(models.Model):
             return super(EkOrder, self).write(vals)
 
     def _compute_onchange_state(self, vals):
-        for record in self:
-            _logger.warning("ORDER NAME: '%s'", record.name)
-            _logger.warning("existing invoices: '%s'", record.invoice_ids.ids)
+        sale_orders = self.env['sale.order'].search([('name', '=', self.origin)])
 
-            if vals.get('ek_state') == "Client livré":
-                _logger.info("Detected EK state 'Client livré'")
+        sale_orders._create_invoices(final=True)
 
-                picking = self.env['stock.picking'].search([('origin', '=', record.name)])
-                if picking:
-                    _logger.info("Found associated stock picking '%s'", picking.name)
-                    picking.button_validate()
-                    _logger.info("Validated associated stock picking '%s'", picking.name)
-                else:
-                    _logger.warning("No stock picking found for order '%s'", record.name)
-
-                invoice_line_vals = [(0, 0, {
-                    'product_id': line.product_id.id,
-                    'name': line.name,
-                    'quantity': line.product_uom_qty,
-                    'price_unit': line.price_unit,
-                    'account_id': line.product_id.categ_id.property_account_income_categ_id.id,
-                }) for line in record.order_line]
-
-                if invoice_line_vals:  # Check if there are order lines before creating an invoice
-                    invoice_vals = {
-                        'partner_id': record.partner_id.id,
-                        'invoice_origin': record.name,
-                        'move_type': 'out_invoice',
-                        'currency_id': record.currency_id.id,
-                        'invoice_line_ids': invoice_line_vals,
-                    }
-
-                    invoice = self.env['account.move'].sudo().create(invoice_vals)
-                    _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name, record.name)
-
-                    # Post the invoice
-                    invoice.action_post()
-                    _logger.info("Invoice posted successfully for order '%s'", record.name)
-                    order_id = self.mapped('order_line.order_id')
-                    invoice.message_post_with_view('mail.message_origin_link',
-                                                   values={'self': invoice,
-                                                           'origin': order_id},
-                                                   subtype_id=self.env.ref('mail.mt_note').id
-                                                   )
-                    # Update invoice_ids with new invoice
-                    try:
-                        existing_invoice_ids = record.invoice_ids.ids  # Get the existing invoice ids
-                        new_invoice_id = invoice.id  # Get the id of the new invoice
-
-                        # Combine the existing ids with the new id, removing duplicates
-                        updated_invoice_ids = list(set(existing_invoice_ids + [new_invoice_id]))
-
-                        # Update invoice_ids with the updated list of ids
-                        record.write({'invoice_ids': [(6, 0, updated_invoice_ids)]})
-                        _logger.debug("Invoice linked to sale order '%s'", record.name)
-                        _logger.warning("INVOICE IDS: %s", record.invoice_ids.ids)
-
-                        # Explicitly commit the changes to the database
-                        self.env.cr.commit()
-
-                    except Exception as e:
-                        _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
-                else:
-                    _logger.warning("No order lines found for order '%s'", record.name)
+        return sale_orders.action_view_invoice()
