@@ -186,6 +186,8 @@ class EkOrder(models.Model):
 
     def _compute_onchange_state(self, vals):
         for record in self:
+            _logger.warning("O R D E R      N A M E '%s'", record.name)
+
             if vals.get('ek_state') == "Client livré":
                 _logger.info("Detected EK state 'Client livré'")
 
