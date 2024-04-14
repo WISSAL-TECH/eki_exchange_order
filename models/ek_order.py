@@ -225,10 +225,10 @@ class EkOrder(models.Model):
                     _logger.info("Invoice posted successfully for order '%s'", record.name)
                     order_id = self.mapped('order_line.order_id')
                     invoice.message_post_with_view('mail.message_origin_link',
-                                                values={'self': invoice,
-                                                        'origin': order_id},
-                                                subtype_id=self.env.ref('mail.mt_note').id
-                                                )
+                                                   values={'self': invoice,
+                                                           'origin': order_id},
+                                                   subtype_id=self.env.ref('mail.mt_note').id
+                                                   )
                     # Update invoice_ids with new invoice
                     try:
                         existing_invoice_ids = record.invoice_ids.ids  # Get the existing invoice ids
@@ -241,6 +241,10 @@ class EkOrder(models.Model):
                         record.write({'invoice_ids': [(6, 0, updated_invoice_ids)]})
                         _logger.debug("Invoice linked to sale order '%s'", record.name)
                         _logger.warning("INVOICE IDS: %s", record.invoice_ids.ids)
+
+                        # Explicitly commit the changes to the database
+                        self.env.cr.commit()
+
                     except Exception as e:
                         _logger.error("Error linking invoice to sale order '%s': %s", record.name, e)
                 else:
