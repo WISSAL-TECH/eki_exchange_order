@@ -211,7 +211,9 @@ class EkOrder(models.Model):
                     }) for line in record.order_line],
                 }
                 if invoice_vals['invoice_line_ids']:  # Check if there are order lines before creating an invoice
-                    invoice = self.env['account.move'].create(invoice_vals)
+                    invoice = self.env['account.move'].sudo().with_context(default_move_type='out_invoice').create(
+                        invoice_vals)
+
                     _logger.info("Invoice created with invoice_origin '%s' for order '%s'", record.name,
                                  record.name)  # Log creation with invoice_origin
 
@@ -220,7 +222,12 @@ class EkOrder(models.Model):
 
                     invoice.action_post()
                     _logger.info("Invoice posted successfully for order '%s'", record.name)
-
+                    for move in invoice:
+                        move.message_post_with_view('mail.message_origin_link',
+                                                    values={'self': move,
+                                                            'origin': move.line_ids.mapped('sale_line_ids.order_id')},
+                                                    subtype_id=self.env.ref('mail.mt_note').id
+                                                    )
                     # Add the invoice to the Many2many field
                     try:
                         record.write({'invoice_ids': [(4, invoice.id)]})  # Update invoice_ids with new invoice
