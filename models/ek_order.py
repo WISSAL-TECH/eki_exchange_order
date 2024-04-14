@@ -227,7 +227,7 @@ class EkOrder(models.Model):
                     for move in invoice:
                         move.message_post_with_view('mail.message_origin_link',
                                                     values={'self': move,
-                                                            'origin': move.mapped('invoice_origin')},
+                                                            'origin': record.id},
                                                     subtype_id=self.env.ref('mail.mt_note').id
                                                     )
                     # Add the invoice to the Many2many field
