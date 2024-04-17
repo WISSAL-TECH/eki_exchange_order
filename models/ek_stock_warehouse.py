@@ -143,45 +143,87 @@ class StockPicking(models.Model):
         data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            if line.product_id.tax_string:
-                pattern = r'(\d[\d\s,.]+)'
+            if line.locaton_id.company_id.name == "Centrale des Achats":
+                if line.product_id.tax_string:
+                    pattern = r'(\d[\d\s,.]+)'
 
-                # Use the findall function to extract all matches
-                matches = re.findall(pattern, line.product_id.tax_string)
+                    # Use the findall function to extract all matches
+                    matches = re.findall(pattern, line.product_id.tax_string)
 
 
-                # Join the matches into a single string (if there are multiple matches)
-                numeric_value = ''.join(matches)
+                    # Join the matches into a single string (if there are multiple matches)
+                    numeric_value = ''.join(matches)
 
-                # Replace commas with dots (if necessary)
-                numeric_value = numeric_value.replace(',', '.')
+                    # Replace commas with dots (if necessary)
+                    numeric_value = numeric_value.replace(',', '.')
 
-                # Remove non-breaking space characters
-                numeric_value = numeric_value.replace('\xa0', '')
+                    # Remove non-breaking space characters
+                    numeric_value = numeric_value.replace('\xa0', '')
 
+                else:
+                    numeric_value = line.product_id.list_price
+                dataa = {
+                    "pos": "EKIWH",
+                    "configuration_ref_odoo": line.product_id.ref_odoo,
+                    "realQuantity": line.product_id.qty_available,
+                    "price": numeric_value}
+                data.append(dataa)
+
+
+                _logger.info(
+                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                logging.warning(str(self.domain) + str(self.url_commande) + '/' + str(self.ek_file))
+                response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1, response
             else:
-                numeric_value = line.product_id.list_price
-            dataa = {
-                "pos": "EKIWH",
-                "configuration_ref_odoo": line.product_id.ref_odoo,
-                "realQuantity": line.product_id.qty_available,
-                "price": numeric_value}
-            data.append(dataa)
+                if line.product_id.tax_string:
+                    pattern = r'(\d[\d\s,.]+)'
+
+                    # Use the findall function to extract all matches
+                    matches = re.findall(pattern, line.product_id.tax_string)
 
 
-        _logger.info(
-                '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
-        response1 = requests.put(self.domain + self.url_stock, data=json.dumps(data),
-                                         headers=self.headers)
-        _logger.info(
-                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
-        _logger.info(
-                '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
-        logging.warning(str(self.domain) + str(self.url_commande) + '/' + str(self.ek_file))
-        response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
-        _logger.info(
-                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-        return response1, response
+                    # Join the matches into a single string (if there are multiple matches)
+                    numeric_value = ''.join(matches)
+
+                    # Replace commas with dots (if necessary)
+                    numeric_value = numeric_value.replace(',', '.')
+
+                    # Remove non-breaking space characters
+                    numeric_value = numeric_value.replace('\xa0', '')
+
+                else:
+                    numeric_value = line.product_id.list_price
+                dataa = {
+                    "pos": self.location_id.company_id.codification,
+                    "configuration_ref_odoo": line.product_id.ref_odoo,
+                    "realQuantity": line.qty_done,
+                    "price": numeric_value}
+                data.append(dataa)
+
+
+                _logger.info(
+                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                logging.warning(str(self.domain) + str(self.url_commande) + '/' + str(self.ek_file))
+                response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1, response
+
 
     def write(self, vals):
 
