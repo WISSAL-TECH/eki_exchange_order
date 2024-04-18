@@ -143,7 +143,7 @@ class StockPicking(models.Model):
         data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            if line.locaton_id.company_id.name == "Centrale des Achats":
+            if self.locaton_dest_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
 
@@ -203,7 +203,7 @@ class StockPicking(models.Model):
                 else:
                     numeric_value = line.product_id.list_price
                 dataa = {
-                    "pos": self.location_id.company_id.codification,
+                    "pos": self.location_dest_id.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": line.qty_done,
                     "price": numeric_value}
