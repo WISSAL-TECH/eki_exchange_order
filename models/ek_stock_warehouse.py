@@ -143,7 +143,7 @@ class StockPicking(models.Model):
         data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            if self.locaton_dest_id.company_id.name == "Centrale des Achats":
+            if self.location_dest_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
 
