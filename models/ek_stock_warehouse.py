@@ -28,7 +28,6 @@ class StockPicking(models.Model):
     url_stock = '/api/odoo/stocks'
     url_commande = '/api/odoo/order'
 
-    domain = "https://apiadmin-alsalam-stg.wissal-group.com"
 
     def _compute_ek_file(self):
         """function to compute the ek_file value"""
@@ -133,6 +132,14 @@ class StockPicking(models.Model):
                     action = self.action_view_reception_report()
                     action['context'] = {'default_picking_ids': self.ids}
                     return action
+        domain = ""
+        domain_cpa = ""
+        config_settings = self.env['res.config.settings'].search([], order='id desc', limit=1)
+        if config_settings:
+            domain = config_settings.domain
+            domain_cpa = config_settings.domain_cpa
+        _logger.info('\n\n\nDOMAIN\n\n\n\n--->>  %s\n\n\n\n', domain)
+        _logger.info('\n\n\nDOMAIN\n\n\n\n--->>  %s\n\n\n\n', domain_cpa)
 
         num_dossier = self.env['sale.order'].search([('name', '=', self.origin)]).ek_file
 
@@ -182,7 +189,20 @@ class StockPicking(models.Model):
                 response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-                return response1, response
+                _logger.info(
+                    '\n\n\n sending stock.picking to ek cpa \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data),
+                                             headers=self.headers)
+                _logger.info(
+                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                    '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                logging.warning(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file))
+                response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file),
+                                            headers=self.headers)
+                _logger.info(
+                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1, response, response1_cpa, response_cpa
             else:
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
@@ -211,18 +231,30 @@ class StockPicking(models.Model):
 
 
                 _logger.info(
-                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', dataa)
-                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(dataa),
+                        '\n\n\n sending stock.picking to pdv \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1 = requests.put(domain + self.url_stock, data=json.dumps(data),
                                                  headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
                 _logger.info(
                         '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
-                logging.warning(str(self.domain) + str(self.url_commande) + '/' + str(self.ek_file))
-                response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                logging.warning(str(domain) + str(self.url_commande) + '/' + str(self.ek_file))
+                response = requests.put(str(domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-                return response1, response
+                _logger.info(
+                        '\n\n\n sending stock.picking to pdv cpa \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                logging.warning(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file))
+                response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1_cpa, response_cpa
 
 
     def write(self, vals):
