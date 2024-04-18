@@ -211,8 +211,8 @@ class StockPicking(models.Model):
 
 
                 _logger.info(
-                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(data),
+                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', dataa)
+                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(dataa),
                                                  headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
