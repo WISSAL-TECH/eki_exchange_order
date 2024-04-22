@@ -179,14 +179,14 @@ class StockPicking(models.Model):
 
                 _logger.info(
                         '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1 = requests.put(self.domain + self.url_stock, data=json.dumps(data),
+                response1 = requests.put(domain + self.url_stock, data=json.dumps(data),
                                                  headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
                 _logger.info(
                         '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
-                logging.warning(str(self.domain) + str(self.url_commande) + '/' + str(self.ek_file))
-                response = requests.put(str(self.domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                logging.warning(str(domain) + str(self.url_commande) + '/' + str(self.ek_file))
+                response = requests.put(str(domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
                 _logger.info(
