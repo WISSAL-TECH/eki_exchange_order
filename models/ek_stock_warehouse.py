@@ -227,7 +227,7 @@ class StockPicking(models.Model):
                     numeric_value = line.product_id.list_price
                 product_stock = self.search(
                     [('location_id.company_id', '=', self.location_dest_id.company_id.id),
-                     ('product_id', '=', line.product_id)])
+                     ('product_id', '=', line.product_id.id)])
 
                 dataa = {
                     "pos": self.location_dest_id.company_id.codification,
