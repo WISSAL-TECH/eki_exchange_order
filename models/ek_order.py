@@ -30,7 +30,8 @@ class EkOrder(models.Model):
 
         # RECEIVE ORDER/QUOTATION FROM EK
         if 'create_by' in vals and vals['create_by'] != 'odoo':
-
+            logging.warning("order create by======")
+            logging.warning(vals['create_by'])
             # SEARCH FOR THE CLIENT
             if "client" in vals:
                 if vals["client"]:
