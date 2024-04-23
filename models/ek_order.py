@@ -126,7 +126,10 @@ class EkOrder(models.Model):
                     # Get the product record based on ref_odoo
                     if 'ref_odoo' in line:
                         product = self.env['product.product'].search([('ref_odoo', '=', line['ref_odoo'])],
-                                                                     order='create_date DESC', limit=1)
+                                                                      limit=1)
+
+                        logging.warning("PRODUCT IN ORDER TO CREATE======")
+                        logging.warning(product.name)
 
                     # Ensure a single product is found
                     if product:
