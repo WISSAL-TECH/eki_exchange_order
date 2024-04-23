@@ -20,8 +20,15 @@ class StockPicking(models.Model):
 
     create_by = fields.Char(string="Créé à partir de", readonly=True)
     ek_file = fields.Char("Dossier ekiclik", compute="_compute_ek_file")
-    can_validate = fields.Selection([('validating', 'Dossier en cours de  validation'), ('validated', 'Dossier validé')], 'Status de validation', default='validated')
+    can_validate = fields.Selection([('validating', 'Dossier en cours de  validation'), ('validated', 'Dossier validé')], 'Status de validation', default='validating')
     order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase')
+
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super(StockPicking, self).default_get(fields_list)
+        company_id = self.env.company.id
+        if company_id == 3 :
+            defaults['can_validate'] = 'validated'
 
     # set the url and headers
     headers = {"Content-Type": "application/json", "Accept": "application/json", "Catch-Control": "no-cache"}
