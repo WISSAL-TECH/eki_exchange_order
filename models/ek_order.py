@@ -125,7 +125,6 @@ class EkOrder(models.Model):
                 for line in order_line_values:
                     if 'ref_odoo' in line:
                         product = self.env['product.product'].search([
-                            '|',
                             ('ref_odoo', '=', line['ref_odoo']),
                             ('name', '=', line['product_name'])
                         ], limit=1)
