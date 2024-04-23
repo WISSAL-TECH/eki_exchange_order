@@ -102,9 +102,14 @@ class EkOrder(models.Model):
             vals['create_by'] = "ekiclik"
             if 'pdv' in vals:
                 company = self.env['res.company'].search([('codification', '=', vals['pdv'])])
+                vals.pop('pdv')
                 if company:  # Check if company is found
-                    vals.pop('pdv')
+                    logging.warning("found company======")
+                    logging.warning(company.name)
                     vals['company_id'] = company.id
+                else:
+                    logging.warning(" company not found ======")
+
 
             logging.warning("DATA TO CREATE======")
             logging.warning(vals)
