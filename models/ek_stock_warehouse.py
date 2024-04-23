@@ -169,8 +169,9 @@ class StockPicking(models.Model):
 
                 else:
                     numeric_value = line.product_id.list_price
-                product_stock = self.search(
-                    [('location_id.company_id', '=', self.location_dest_id.company_id.id),('product_id', '=', line.product_id)])
+                product_stock = self.env['stock.quant'].search([
+                    ('location_id', '=', self.location_dest_id.id),
+                    ('product_id', '=', line.product_id.id)])
 
                 dataa = {
                     "pos": "EKIWH",
