@@ -175,7 +175,7 @@ class StockPicking(models.Model):
                 dataa = {
                     "pos": "EKIWH",
                     "configuration_ref_odoo": line.product_id.ref_odoo,
-                    "realQuantity": product_stock.inventory_quantity,
+                    "realQuantity": product_stock.inventory_quantity if product_stock else line.qty_done,
                     "price": numeric_value}
                 data.append(dataa)
 
@@ -225,7 +225,6 @@ class StockPicking(models.Model):
 
                 else:
                     numeric_value = line.product_id.list_price
-
                 product_stock = self.search(
                     [('location_id.company_id', '=', self.location_dest_id.company_id.id),
                      ('product_id', '=', line.product_id)])
@@ -233,7 +232,7 @@ class StockPicking(models.Model):
                 dataa = {
                     "pos": self.location_dest_id.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
-                    "realQuantity": product_stock.inventory_quantity,
+                    "realQuantity": product_stock.inventory_quantity if product_stock else line.qty_done,
                     "price": line.product_id.list_price}
                 data.append(dataa)
 
