@@ -126,7 +126,7 @@ class EkOrder(models.Model):
                     if 'ref_odoo' in line:
                         product = self.env['product.product'].search([
                             ('ref_odoo', '=', line['ref_odoo']),
-                            ('name', '=', line['product_name'])
+                            ('name_store', '=', line['product_name'])
                         ], limit=1)
 
                         logging.warning("PRODUCT IN ORDER TO CREATE======")
