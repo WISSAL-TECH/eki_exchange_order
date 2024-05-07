@@ -159,7 +159,7 @@ class StockPicking(models.Model):
         data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            if self.location_dest_id.company_id.name == "Centrale des Achats":
+            if self.location_dest_id.company_id.name == "Centrale des Achats" or  self.location_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
 
@@ -216,6 +216,7 @@ class StockPicking(models.Model):
                 _logger.info(
                     '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
                 return response1, response, response1_cpa, response_cpa
+
             else:
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
