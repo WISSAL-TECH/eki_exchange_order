@@ -54,6 +54,8 @@ class StockPicking(models.Model):
     def button_validate(self):
         # Clean-up the context key at validation to avoid forcing the creation of immediate
         # transfers.
+        _logger.info('\n\n\nbutton validate stock.picking\n\n\n\n--->>  \n\n\n\n' )
+
         ctx = dict(self.env.context)
         ctx.pop('default_immediate_transfer', None)
         self = self.with_context(ctx)
