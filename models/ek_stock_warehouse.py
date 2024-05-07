@@ -183,8 +183,8 @@ class StockPicking(models.Model):
                 dataa = {
                     "pos": "EKIWH",
                     "configuration_ref_odoo": line.product_id.ref_odoo,
-                    "realQuantity": product_stock.inventory_quantity if product_stock else line.qty_done,
-                    "price": numeric_value}
+                    "realQuantity": product_stock.quantity if product_stock else line.qty_done,
+                    "price": line.product_id.list_price}
                 data.append(dataa)
 
 
