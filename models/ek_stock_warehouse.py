@@ -241,12 +241,20 @@ class StockPicking(models.Model):
 
                 else:
                     numeric_value = line.product_id.list_price
-                product_stock = self.env['stock.quant'].search([
-                    ('location_id', '=', self.location_dest_id.id),
-                    ('product_id', '=', line.product_id.id)])
 
+                if self.location_id:
+                    product_stock = self.env['stock.quant'].search([
+                        ('location_id', '=', self.location_id.id),
+                        ('product_id', '=', line.product_id.id)])
+                    company = self.location_id
+
+                else:
+                    product_stock = self.env['stock.quant'].search([
+                        ('location_id', '=', self.location_dest_id.id),
+                        ('product_id', '=', line.product_id.id)])
+                    company = self.location_dest_id
                 dataa = {
-                    "pos": self.location_dest_id.company_id.codification,
+                    "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
                     "price": line.product_id.list_price}
