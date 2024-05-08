@@ -178,12 +178,8 @@ class StockPicking(models.Model):
 
                 else:
                     numeric_value = line.product_id.list_price
-                if self.location_id:
-                    product_stock = self.env['stock.quant'].search([
-                        ('location_id', '=', self.location_id.id),
-                        ('product_id', '=', line.product_id.id)], limit=1)
-                else:
-                    product_stock = self.env['stock.quant'].search([
+
+                product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)], limit=1)
 
