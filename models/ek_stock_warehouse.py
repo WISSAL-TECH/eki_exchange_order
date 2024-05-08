@@ -159,7 +159,7 @@ class StockPicking(models.Model):
         data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            if self.location_dest_id.company_id.name == "Centrale des Achats" or  self.location_id.company_id.name == "Centrale des Achats":
+            if self.location_dest_id.company_id.name == "Centrale des Achats" or self.location_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
 
@@ -181,11 +181,11 @@ class StockPicking(models.Model):
                 if self.location_id:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
 
                 dataa = {
                     "pos": "EKIWH",
