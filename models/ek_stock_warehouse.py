@@ -189,6 +189,11 @@ class StockPicking(models.Model):
                         '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
                     _logger.info(product_stock)
                     _logger.info(product_stock.quantity)
+                    dataa = {
+                        "pos": "EKIWH",
+                        "configuration_ref_odoo": line.product_id.ref_odoo,
+                        "realQuantity": product_stock.quantity,
+                        "price": line.product_id.list_price}
 
                 else:
                     product_stock = self.env['stock.quant'].search([
@@ -198,13 +203,12 @@ class StockPicking(models.Model):
                         '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
                     _logger.info(product_stock)
                     _logger.info(product_stock.quantity)
+                    dataa = {
+                        "pos": "EKIWH",
+                        "configuration_ref_odoo": line.product_id.ref_odoo,
+                        "realQuantity": product_stock.quantity if product_stock else line.qty_done,
+                        "price": line.product_id.list_price}
 
-
-                dataa = {
-                    "pos": "EKIWH",
-                    "configuration_ref_odoo": line.product_id.ref_odoo,
-                    "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.list_price}
                 data.append(dataa)
 
 
