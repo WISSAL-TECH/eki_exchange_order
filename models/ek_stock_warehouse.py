@@ -178,7 +178,7 @@ class StockPicking(models.Model):
                         ('product_id', '=', line.product_id.id)])
                 else:
                     product_stock = self.env['stock.quant'].search([
-                        ('location_dest_id', '=', self.location_dest_id.id),
+                        ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)])
 
                 if product_stock:
@@ -251,7 +251,7 @@ class StockPicking(models.Model):
 
                 else:
                     product_stock = self.env['stock.quant'].search([
-                        ('location_dest_id', '=', self.location_dest_id.id),
+                        ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)])
                     company = self.location_dest_id
                 dataa = {
