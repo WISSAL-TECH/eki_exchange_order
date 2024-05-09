@@ -156,20 +156,30 @@ class StockPicking(models.Model):
             "requestNumber": num_dossier,
             "state": "EK_ORDER_DELIVERED"
         }
-        data = []
-
+        data =[]
         for line in self.move_line_ids_without_package:
             numeric_value = ""
+            _logger.info(
+                '\n\n\n liiiiiiiiiiiiine \n\n\n\n--->> \n\n\n\n')
             if self.location_dest_id.company_id.name == "Centrale des Achats" or self.location_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
+
+                    # Use the findall function to extract all matches
                     matches = re.findall(pattern, line.product_id.tax_string)
+
+
+                    # Join the matches into a single string (if there are multiple matches)
                     numeric_value = ''.join(matches)
+
+                    # Replace commas with dots (if necessary)
                     numeric_value = numeric_value.replace(',', '.')
+
+                    # Remove non-breaking space characters
                     numeric_value = numeric_value.replace('\xa0', '')
+
                 else:
                     numeric_value = line.product_id.list_price
-
                 if self.picking_type_id == "outgoing":
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
@@ -183,37 +193,54 @@ class StockPicking(models.Model):
                     "pos": "EKIWH",
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.list_price
-                }
+                    "price": line.product_id.list_price}
                 data.append(dataa)
 
-                _logger.info('\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1 = requests.put(domain + self.url_stock, data=json.dumps(data), headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
 
-                _logger.info('\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                _logger.info(
+                        '\n\n\n sending stock.picking to ek \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1 = requests.put(domain + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
                 logging.warning(str(domain) + str(self.url_commande) + '/' + str(self.ek_file))
-                response = requests.put(str(domain) + str(self.url_commande) + '/' + str(self.ek_file),
-                                        headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-
-                _logger.info('\n\n\n sending stock.picking to ek cpa \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data), headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
-
-                _logger.info('\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                response = requests.put(str(domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                _logger.info(
+                    '\n\n\n sending stock.picking to ek cpa \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data),
+                                             headers=self.headers)
+                _logger.info(
+                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                    '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
                 logging.warning(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file))
                 response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file),
                                             headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                _logger.info(
+                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1, response, response1_cpa, response_cpa
 
             else:
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
+
+                    # Use the findall function to extract all matches
                     matches = re.findall(pattern, line.product_id.tax_string)
+
+
+                    # Join the matches into a single string (if there are multiple matches)
                     numeric_value = ''.join(matches)
+
+                    # Replace commas with dots (if necessary)
                     numeric_value = numeric_value.replace(',', '.')
+
+                    # Remove non-breaking space characters
                     numeric_value = numeric_value.replace('\xa0', '')
+
                 else:
                     numeric_value = line.product_id.list_price
 
@@ -232,31 +259,36 @@ class StockPicking(models.Model):
                     "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.list_price
-                }
+                    "price": line.product_id.list_price}
                 data.append(dataa)
 
-                _logger.info('\n\n\n sending stock.picking to pdv \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1 = requests.put(domain + self.url_stock, data=json.dumps(data), headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
 
-                _logger.info('\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                _logger.info(
+                        '\n\n\n sending stock.picking to pdv \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1 = requests.put(domain + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
                 logging.warning(str(domain) + str(self.url_commande) + '/' + str(self.ek_file))
-                response = requests.put(str(domain) + str(self.url_commande) + '/' + str(self.ek_file),
-                                        headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-
-                _logger.info('\n\n\n sending stock.picking to pdv cpa \n\n\n\n--->>  %s\n\n\n\n', data)
-                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data), headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
-
-                _logger.info('\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
+                response = requests.put(str(domain) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                _logger.info(
+                        '\n\n\n sending stock.picking to pdv cpa \n\n\n\n--->>  %s\n\n\n\n', data)
+                response1_cpa = requests.put(domain_cpa + self.url_stock, data=json.dumps(data),
+                                                 headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response1)
+                _logger.info(
+                        '\n\n\n sending state to ek \n\n\n\n--->>  %s\n\n\n\n', commande)
                 logging.warning(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file))
-                response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file),
-                                            headers=self.headers)
-                _logger.info('\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
+                _logger.info(
+                            '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                return response1_cpa, response_cpa
 
-            return response1, response, response1_cpa, response_cpa
 
     def write(self, vals):
 
