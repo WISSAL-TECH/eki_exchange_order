@@ -160,55 +160,38 @@ class StockPicking(models.Model):
         responses = []
         for line in self.move_line_ids_without_package:
             numeric_value = ""
-            _logger.info(
-                '\n\n\n liiiiiiiiiiiiine \n\n\n\n--->> \n\n\n\n')
+            _logger.info('\n\n\n liiiiiiiiiiiiine \n\n\n\n--->> \n\n\n\n')
+
             if self.location_dest_id.company_id.name == "Centrale des Achats" or self.location_id.company_id.name == "Centrale des Achats":
                 if line.product_id.tax_string:
                     pattern = r'(\d[\d\s,.]+)'
-
-                    # Use the findall function to extract all matches
                     matches = re.findall(pattern, line.product_id.tax_string)
-
-
-                    # Join the matches into a single string (if there are multiple matches)
                     numeric_value = ''.join(matches)
-
-                    # Replace commas with dots (if necessary)
                     numeric_value = numeric_value.replace(',', '.')
-
-                    # Remove non-breaking space characters
                     numeric_value = numeric_value.replace('\xa0', '')
-
                 else:
                     numeric_value = line.product_id.list_price
+
                 if self.picking_type_id == "outgoing":
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
                         ('product_id', '=', line.product_id.id)])
-                    _logger.info(
-                        '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
-                    _logger.info(product_stock)
-                    _logger.info(product_stock.quantity)
-                    dataa = {
-                        "pos": "EKIWH",
-                        "configuration_ref_odoo": line.product_id.ref_odoo,
-                        "realQuantity": product_stock.quantity,
-                        "price": line.product_id.list_price}
-
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)])
-                    _logger.info(
-                        '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
-                    _logger.info(product_stock)
-                    _logger.info(product_stock.quantity)
-                    dataa = {
-                        "pos": "EKIWH",
-                        "configuration_ref_odoo": line.product_id.ref_odoo,
-                        "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                        "price": line.product_id.list_price}
 
+                if product_stock:
+                    real_quantity = product_stock.quantity
+                else:
+                    real_quantity = line.qty_done
+
+                dataa = {
+                    "pos": "EKIWH",
+                    "configuration_ref_odoo": line.product_id.ref_odoo,
+                    "realQuantity": real_quantity,
+                    "price": line.product_id.list_price
+                }
                 data.append(dataa)
 
 
