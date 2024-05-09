@@ -157,6 +157,7 @@ class StockPicking(models.Model):
             "state": "EK_ORDER_DELIVERED"
         }
         data =[]
+        responses = []
         for line in self.move_line_ids_without_package:
             numeric_value = ""
             _logger.info(
@@ -222,7 +223,8 @@ class StockPicking(models.Model):
                                             headers=self.headers)
                 _logger.info(
                     '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-                return response1, response, response1_cpa, response_cpa
+                responses.extend([response1, response, response1_cpa, response_cpa])
+
 
             else:
                 if line.product_id.tax_string:
@@ -287,8 +289,7 @@ class StockPicking(models.Model):
                 response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) +'/'+ str(self.ek_file), headers=self.headers)
                 _logger.info(
                             '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
-                return response1_cpa, response_cpa
-
+                responses.extend([response1, response, response1_cpa, response_cpa])
 
     def write(self, vals):
 
