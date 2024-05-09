@@ -175,11 +175,11 @@ class StockPicking(models.Model):
                 if self.picking_type_id == "outgoing":
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
 
                 if product_stock:
                     real_quantity = product_stock.quantity
@@ -246,13 +246,13 @@ class StockPicking(models.Model):
                 if self.picking_type_id == "outgoing":
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
                     company = self.location_id
 
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
-                        ('product_id', '=', line.product_id.id)])
+                        ('product_id', '=', line.product_id.id)], limit=1)
                     company = self.location_dest_id
                 dataa = {
                     "pos": company.company_id.codification,
