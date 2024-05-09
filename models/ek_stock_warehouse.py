@@ -185,10 +185,20 @@ class StockPicking(models.Model):
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
                         ('product_id', '=', line.product_id.id)])
+                    _logger.info(
+                        '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
+                    _logger.info(product_stock)
+                    _logger.info(product_stock.quantity)
+
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)])
+                    _logger.info(
+                        '\n\n\n product stock \n\n\n\n--->> \n\n\n\n')
+                    _logger.info(product_stock)
+                    _logger.info(product_stock.quantity)
+
 
                 dataa = {
                     "pos": "EKIWH",
