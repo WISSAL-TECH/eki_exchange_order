@@ -244,11 +244,15 @@ class StockPicking(models.Model):
                     numeric_value = line.product_id.list_price
 
                 if self.picking_type_id.name == "Livraisons":
+
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_id.id),
                         ('product_id', '=', line.product_id.id)], limit=1)
                     company = self.location_id
-
+                    _logger.info(
+                        '\n\n\n livraison \ available_quantityn\n\n\n--->>  %s\n\n\n\n', product_stock.available_quantity)
+                    _logger.info(
+                        '\n\n\n livraison quantity \n\n\n\n--->>  %s\n\n\n\n', product_stock.quantity)
                 else:
                     product_stock = self.env['stock.quant'].search([
                         ('location_id', '=', self.location_dest_id.id),
@@ -257,7 +261,7 @@ class StockPicking(models.Model):
                 dataa = {
                     "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
-                    "realQuantity": product_stock.quantity if product_stock else line.qty_done,
+                    "realQuantity": product_stock.available_quantity if product_stock else line.qty_done,
                     "price": line.product_id.list_price}
                 data.append(dataa)
 
