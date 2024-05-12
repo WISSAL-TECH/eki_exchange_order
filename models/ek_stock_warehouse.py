@@ -223,7 +223,7 @@ class StockPicking(models.Model):
                 response_cpa = requests.put(str(domain_cpa) + str(self.url_commande) + '/' + str(self.ek_file),
                                             headers=self.headers)
                 _logger.info(
-                    '\n\n\n response \n\n\n\n--->>  %s\n\n\n\n', response)
+                    '\n\n\n response1_cpa \n\n\n\n--->>  %s\n\n\n\n', response1_cpa)
                 responses.extend([response1, response, response1_cpa, response_cpa])
 
 
