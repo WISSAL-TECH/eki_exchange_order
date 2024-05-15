@@ -143,7 +143,6 @@ class EkOrder(models.Model):
                             'order_id': rec.id
                         }
                         self.env['sale.order.line'].create(order_values)
-
                     else:
                         new_product = self.env['product.product'].create({
                             'name': line['product_name'],
