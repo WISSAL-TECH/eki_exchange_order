@@ -30,7 +30,7 @@
         'security/ir.model.access.csv',
 
         'views/ek_order_inherit.xml',
-        #'views/ek_stock_picking_inherit.xml',
+        'views/ek_stock_picking_inherit.xml',
 
     ],
     # only loaded in demonstration mode
