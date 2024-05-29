@@ -14,7 +14,7 @@
             <xpath expr="//field[@name='origin']" position="after">
                 <field name="ek_file" invisible="1"/>
                 <field name="order_or_purchase" invisible="1"/>
-                <field name="can_validate" attrs="{'invisible': [('company_id.name', '=', 'Centrale des Achats')]}"/>
+                <field name="can_validate" attrs="{'invisible': [('company_id', '=', 'Centrale des Achats')]}"/>
 
             </xpath>
         </field>
