@@ -24,7 +24,7 @@ class StockPicking(models.Model):
         ('validating', 'Dossier en cours de validation'),
         ('validated', 'Dossier validé')],
         'Status de validation',
-        default=lambda self: 'validated' if self.env.company.id == 3 else 'validating')
+        default=lambda self: 'validated' if self.env.company.name == 'Centrale des Achats' else 'validating')
 
     order_or_purchase = fields.Boolean(string="order", default = False, compute= '_compute_order_or_purchase')
 
