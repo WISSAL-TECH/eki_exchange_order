@@ -194,7 +194,7 @@ class StockPicking(models.Model):
                     "pos": "EKIWH",
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": real_quantity,
-                    "price": line.product_id.prix_ek
+                    "price": line.product_id.standard_price
                 }
                 data.append(dataa)
 
@@ -266,7 +266,7 @@ class StockPicking(models.Model):
                     "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.prix_ek}
+                    "price": line.product_id.prix_central}
                 data.append(dataa)
 
 
