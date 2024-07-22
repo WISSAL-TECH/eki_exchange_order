@@ -263,7 +263,7 @@ class StockPicking(models.Model):
                     "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.prix_central}
+                    "price": line.product_id.price}
                 data.append(dataa)
 
 
