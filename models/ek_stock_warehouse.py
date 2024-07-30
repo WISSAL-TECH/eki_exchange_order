@@ -141,8 +141,8 @@ class StockPicking(models.Model):
                     action = self.action_view_reception_report()
                     action['context'] = {'default_picking_ids': self.ids}
                     return action
-        domain = "https://apiadmin-alsalam.ekiclik.dz"
-        domain_cpa = "https://apiadmin-cpa.ekiclik.dz"
+        domain = "https://apiadmin-preprod-alsalam.ekiclik.dz"
+        domain_cpa = "https://apiadmin.cpa-preprod.ekiclik.dz"
 
         _logger.info('\n\n\nDOMAIN\n\n\n\n--->>  %s\n\n\n\n', domain)
         _logger.info('\n\n\nDOMAIN\n\n\n\n--->>  %s\n\n\n\n', domain_cpa)
