@@ -191,7 +191,9 @@ class StockPicking(models.Model):
                     "pos": "EKIWH",
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": real_quantity,
-                    "price": line.product_id.standard_price
+                    "price": line.product_id.standard_price,
+                    "sellingPrice": line.product_id.prix_ek,
+
                 }
                 data.append(dataa)
 
@@ -259,14 +261,16 @@ class StockPicking(models.Model):
                         ('location_id', '=', self.location_dest_id.id),
                         ('product_id', '=', line.product_id.id)], limit=1)
                     company = self.location_dest_id
+                selling_price = line.product_id.selling_price_pdv if line.product_id.selling_price_pdv else line.product_id.prix_ek
                 dataa = {
                     "pos": company.company_id.codification,
                     "configuration_ref_odoo": line.product_id.ref_odoo,
                     "realQuantity": product_stock.quantity if product_stock else line.qty_done,
-                    "price": line.product_id.price}
+                    "price": line.product_id.price,
+                    "sellingPrice": selling_price,
+
+                }
                 data.append(dataa)
-
-
                 _logger.info(
                         '\n\n\n sending stock.picking to pdv \n\n\n\n--->>  %s\n\n\n\n', data)
                 response1 = requests.put(domain + self.url_stock, data=json.dumps(data),
